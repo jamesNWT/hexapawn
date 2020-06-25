@@ -60,7 +60,7 @@ int main()
 
 void printRules()
 {
-	cout << "I'll write up the rules later";
+	cout << "I'll write up the rules later\n";
 }
 
 void playGame()
@@ -69,7 +69,9 @@ void playGame()
 	// -1 corresponds to 'X' pieces, 0 to empty squares. and 1 to 'O' pieces.
 	// Trickily, row 0 in the matrix is actually row 3 on the board.
 	// row 1 in matrix is 2 on the board, and row 2 in the matrix is row 1 on the board.
-	int board[3][3] = { {-1, -1, -1}, {0, 0, 0}, {1, 1, 1} };
+	//int board[3][3] = { {-1, -1, -1}, {0, 0, 0}, {1, 1, 1} };
+	int board[3][3] = { {-1, 0, 0}, {1, 0, -1}, {0, 0, 1} };
+
 
 	// Game loop
 	bool gameOver = false;
@@ -182,11 +184,13 @@ vector<Move> calculateLegalMoves(bool isPlayerTurn, int board[3][3])
 		}
 	}
 	
-	return vector<Move>();
+	return moves;
 }
 
 bool checkGameover(int board[3][3], vector<Move> legalMoves)
 {
+	if (legalMoves.size() == 0)
+		return true;
 	return false;
 }
 

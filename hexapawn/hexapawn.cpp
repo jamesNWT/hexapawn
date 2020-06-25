@@ -31,7 +31,7 @@ void playGame();
 
 void draw(int board[3][3]);
 vector<Move> calculateLegalMoves(bool isPlayerTurn, int board[3][3]);
-bool checkGameover(int board[3][3], vector<Move> legalMoves);
+bool checkGameover(int board[3][3], vector<Move> legalMoves, bool isPlayerTurn);
 Move handleInput(vector<Move> legalMoves);
 Move makeCPUMove(vector<Move> legalMoves);
 void update(int (&board)[3][3], Move move);
@@ -82,7 +82,10 @@ void playGame()
 		
 		vector <Move> legalMoves = calculateLegalMoves(isPlayerTurn, board);
 
-		gameOver = checkGameover(board, legalMoves);
+		gameOver = checkGameover(board, legalMoves, isPlayerTurn);
+
+		if (gameOver)
+			break;
 
 		Move move;
 		
@@ -187,10 +190,48 @@ vector<Move> calculateLegalMoves(bool isPlayerTurn, int board[3][3])
 	return moves;
 }
 
-bool checkGameover(int board[3][3], vector<Move> legalMoves)
+bool checkGameover(int board[3][3], vector<Move> legalMoves, bool isPlayerTurn)
 {
-	if (legalMoves.size() == 0)
+	//check for pawns that got to the other end of the board and count the number of pieces on each side.
+	int countX = 0;
+	int countO = 0;
+	for (int col = 0; col < 3; col++) {
+		if (board[0][col] == 1)
+		{
+			cout << "You got a piece to the other end of the board, you win!\n";
+			return true;
+		}
+		if (board[2][col] == -1)
+		{
+			cout << "Computer got a piece to the other end of the board, computer wins!\n";
+			return true;
+		}
+		for (int row = 0; row < 3; row++)
+		{
+			if (board[row][col] == -1)
+				countX++;
+			if (board[row][col] == 1)
+				countO++;
+		}
+	}
+	// If one side had all pieces captured, they lost.
+	if (countX == 0) {
+		cout << "You win!\n";
 		return true;
+	}
+	else if (countO == 0) {
+		cout << "Computer wins!";
+		return true;
+	}
+
+	if (legalMoves.size() == 0) {
+		if (isPlayerTurn)
+			cout << "You have no legal moves, computer wins!\n";
+		else
+			cout << "Computer has no legal moves, you win!\n";
+		return true;
+	}
+
 	return false;
 }
 

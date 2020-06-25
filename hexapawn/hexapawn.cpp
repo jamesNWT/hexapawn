@@ -78,9 +78,7 @@ void playGame()
 	{
 		draw(board);
 		
-		vector <Move> legalMoves;
-
-		legalMoves = calculateLegalMoves(isPlayerTurn, board);
+		vector <Move> legalMoves = calculateLegalMoves(isPlayerTurn, board);
 
 		gameOver = checkGameover(board, legalMoves);
 
@@ -102,10 +100,88 @@ void playGame()
 
 void draw(int board[3][3])
 {
+	cout << "    A   B   C  \n  -------------\n";
+
+	for (int row = 0; row < 3; row++)
+	{
+		for (int col = 0; col < 3; col++)
+		{
+			string tile = " ";
+			switch (board[row][col])
+			{
+			case 1:
+				tile = "O";
+				break;
+			case -1:
+				tile = "X";
+				break;
+			case 0:
+				tile = " ";
+				break;
+			default:
+				cerr << "\nERROR: A value in the board matrix was set to something bad!\n";
+				return;
+			}
+
+			if (col == 0)
+			{
+				cout << (3 - row) << " ";
+			}
+			cout << "| " << tile << " ";
+			if (col == 2)
+			{
+				cout << "|\n  -------------\n";
+			}
+		}
+	}
 }
 
 vector<Move> calculateLegalMoves(bool isPlayerTurn, int board[3][3])
 {
+	vector<Move> moves;
+	int toMove = isPlayerTurn ? 1 : -1; //the piece code for the pieces who's moves we're finding
+
+	for (int row = 0; row < 3; row++)
+	{
+		for (int col = 0; col < 3; col++)
+		{
+			// A convenience of using -1 and 1 to encode the sides, is that the tile "in front" of a piece will 
+			// be the on the matrix row minus that piece's side number. we can also easily get the code for the enemy pieces
+			// of whichever code is in toMove by flipping the sign of toMove.
+
+			if (row - toMove != -1 && row - toMove != 3 && board[row][col] == toMove) {
+
+				// if there is an empty tile in front of the piece, create a move corresponding to the piece there.
+				if (board[row - toMove][col] == 0) {
+
+					array<int, 2> fromCoord = { row, col };
+					array<int, 2> toCoord = { row - toMove, col };
+
+					Move m = Move(fromCoord, toCoord);
+					moves.push_back(m);
+				}
+				// if there is an enemy pawn on the right diagonal in front of the piece, create a move for taking that piece.
+				if (col+1 != 3 && board[row - toMove][col + 1] == -(toMove)) {
+					
+					array<int, 2> fromCoord = { row, col };
+					array<int, 2> toCoord = { row - toMove, col + 1};
+
+					Move m = Move(fromCoord, toCoord);
+					moves.push_back(m);
+				}
+				// if there is an enemy pawn on the left diagonal in front of the piece, create a move for taking that piece.
+				if (col-1 != -1 && board[row - toMove][col - 1] == -(toMove)) {
+
+					array<int, 2> fromCoord = { row, col };
+					array<int, 2> toCoord = { row - toMove, col - 1 };
+
+					Move m = Move(fromCoord, toCoord);
+					moves.push_back(m);
+				}
+			}
+		}
+	}
+	
 	return vector<Move>();
 }
 
@@ -127,14 +203,3 @@ Move makeCPUMove(vector<Move> legalMoves)
 void update(int(&board)[3][3], Move move)
 {
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file

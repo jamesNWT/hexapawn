@@ -84,15 +84,14 @@ void playGame()
 	bool isPlayerTurn = true;
 	while (!gameOver)
 	{
-		if (isPlayerTurn)
-			draw(board);
+		draw(board);
 		
 		vector <Move> legalMoves = calculateLegalMoves(isPlayerTurn, board);
 
 		gameOver = checkGameover(board, legalMoves, isPlayerTurn);
 
 		if (gameOver) {
-			draw(board);
+			
 			break;
 		}
 
@@ -231,7 +230,7 @@ bool checkGameover(int board[3][3], vector<Move> legalMoves, bool isPlayerTurn)
 		return true;
 	}
 	else if (countO == 0) {
-		cout << "Computer wins!";
+		cout << "Computer wins!\n";
 		return true;
 	}
 
@@ -317,7 +316,8 @@ Move handleInput(vector<Move> legalMoves)
 //TODO: implement some AI here.
 Move makeCPUMove(vector<Move> legalMoves)
 {
-	srand (time(NULL));
+	cout << "Computer moved:\n";
+	//srand (time(NULL));
 	int i = (rand() % legalMoves.size());
 
 	return legalMoves[i];

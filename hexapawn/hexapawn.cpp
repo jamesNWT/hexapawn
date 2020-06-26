@@ -6,6 +6,7 @@
 #include <vector>
 #include <array>
 #include <time.h>
+#include <fstream>
 
 using namespace std;
 
@@ -45,13 +46,13 @@ void update(int (&board)[3][3], Move move);
 
 int main()
 {
-    cout << "James' Hexapawn game.\nType \"r\" for rules, \"s\" to start a game, and \"q\" to quit\n";
+    cout << "James' Hexapawn game.\nType \"h\" for help, \"s\" to start a game, and \"q\" to quit\n";
 	string input;
 	
 	cin >> input;
 	while (input.compare("q") != 0) {
 	
-		if (input.compare("r") == 0)
+		if (input.compare("h") == 0)
 		{
 			printRules();
 		}
@@ -60,7 +61,7 @@ int main()
 			playGame();
 		}
 	
-		cout << "Type \"r\" for rules, \"s\" to start a game, and \"q\" to quit\n";
+		cout << "Type \"h\" for help, \"s\" to start a game, and \"q\" to quit\n";
 		cin >> input;
 	}
 
@@ -68,7 +69,11 @@ int main()
 
 void printRules()
 {
-	cout << "I'll write up the rules later\n";
+	std::ifstream file("rules.txt");
+
+	if (file.is_open())
+		std::cout << file.rdbuf();
+	cout << "\n";
 }
 
 void playGame()

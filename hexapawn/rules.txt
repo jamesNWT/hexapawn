@@ -1,0 +1,16 @@
+Rules of hexapawn:
+1. The pieces move like pawns from chess.
+2. You win by either:
+	A) capturing all enemy pieces
+	B) advancing a piece to the other end of the board
+	C) moving a piece so that your opponent has no legal moves
+Help with this implementation of hexapawn:
+1. This program uses text in the console to "draw" the board
+2. Your pieces are represented by O, the opponent's by X
+3. you enter moves similar to how moves are recorded in chess. 
+   simply enter the coordinate of the piece you'd like to move and 
+   the coordinate you'd like to move it to, seperated by a dash.
+   eg: a1-a2 would be a valid opening move for the player with the 
+   "O" pieces.
+4. I recommend you make sure your console has a width of at least 
+   25 characters to make sure the board displays properly.

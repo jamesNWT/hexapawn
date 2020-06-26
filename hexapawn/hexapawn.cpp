@@ -8,30 +8,9 @@
 #include <time.h>
 #include <fstream>
 
+#include "Move.h"
+
 using namespace std;
-
-class Move {
-private:
-	array<int, 2> fromCoord;
-	array<int, 2> toCoord;
-	int piece;
-
-public:
-	Move() {}
-
-	Move(array<int, 2> f, array<int, 2> t, int p)
-		: fromCoord(f), toCoord(t), piece(p)
-	{}
-
-	array<int, 2> getFromCoord() { return this->fromCoord; }
-	array<int, 2> getToCoord() { return this->toCoord; }
-	int getPiece() { return this->piece;  }
-
-	bool equals(Move m)
-	{
-		return (this->fromCoord == m.fromCoord) && (this->toCoord == m.toCoord);
-	}
-};
 
 void printRules();
 void playGame();
@@ -41,17 +20,17 @@ vector<Move> calculateLegalMoves(bool isPlayerTurn, int board[3][3]);
 bool checkGameover(int board[3][3], vector<Move> legalMoves, bool isPlayerTurn);
 Move handleInput(vector<Move> legalMoves);
 Move makeCPUMove(vector<Move> legalMoves);
-void update(int (&board)[3][3], Move move);
+void update(int(&board)[3][3], Move move);
 
 
 int main()
 {
-    cout << "James' Hexapawn game.\nType \"h\" for help, \"s\" to start a game, and \"q\" to quit\n";
+	cout << "James' Hexapawn game.\nType \"h\" for help, \"s\" to start a game, and \"q\" to quit\n";
 	string input;
-	
+
 	cin >> input;
 	while (input.compare("q") != 0) {
-	
+
 		if (input.compare("h") == 0)
 		{
 			printRules();
@@ -60,11 +39,10 @@ int main()
 		{
 			playGame();
 		}
-	
+
 		cout << "Type \"h\" for help, \"s\" to start a game, and \"q\" to quit\n";
 		cin >> input;
 	}
-
 }
 
 void printRules()
@@ -90,18 +68,18 @@ void playGame()
 	while (!gameOver)
 	{
 		draw(board);
-		
+
 		vector <Move> legalMoves = calculateLegalMoves(isPlayerTurn, board);
 
 		gameOver = checkGameover(board, legalMoves, isPlayerTurn);
 
 		if (gameOver) {
-			
+
 			break;
 		}
 
 		Move move;
-		
+
 		if (isPlayerTurn)
 		{
 			move = handleInput(legalMoves);
@@ -111,7 +89,7 @@ void playGame()
 		{
 			move = makeCPUMove(legalMoves);
 		}
-		
+
 		isPlayerTurn = !isPlayerTurn;
 		update(board, move);
 	}
@@ -181,16 +159,16 @@ vector<Move> calculateLegalMoves(bool isPlayerTurn, int board[3][3])
 					moves.push_back(m);
 				}
 				// if there is an enemy pawn on the right diagonal in front of the piece, create a move for taking that piece.
-				if (col+1 != 3 && board[row - toMove][col + 1] == -(toMove)) {
-					
+				if (col + 1 != 3 && board[row - toMove][col + 1] == -(toMove)) {
+
 					array<int, 2> fromCoord = { row, col };
-					array<int, 2> toCoord = { row - toMove, col + 1};
+					array<int, 2> toCoord = { row - toMove, col + 1 };
 
 					Move m = Move(fromCoord, toCoord, toMove);
 					moves.push_back(m);
 				}
 				// if there is an enemy pawn on the left diagonal in front of the piece, create a move for taking that piece.
-				if (col-1 != -1 && board[row - toMove][col - 1] == -(toMove)) {
+				if (col - 1 != -1 && board[row - toMove][col - 1] == -(toMove)) {
 
 					array<int, 2> fromCoord = { row, col };
 					array<int, 2> toCoord = { row - toMove, col - 1 };
@@ -201,7 +179,7 @@ vector<Move> calculateLegalMoves(bool isPlayerTurn, int board[3][3])
 			}
 		}
 	}
-	
+
 	return moves;
 }
 
@@ -252,69 +230,69 @@ bool checkGameover(int board[3][3], vector<Move> legalMoves, bool isPlayerTurn)
 
 Move handleInput(vector<Move> legalMoves)
 {
-	while(true){
+	while (true) {
 
-	cout << "Enter a move: ";
-	string input;
-	cin >> input;
+		cout << "Enter a move: ";
+		string input;
+		cin >> input;
 
-	if (input.size() == 5 && (input[2] == '-')
-		&& ((input[0] >= 'a' && input[0] <= 'c') || (input[0] >= 'A' && input[0] <= 'C'))
-		&& ((input[3] >= 'a' && input[3] <= 'c') || (input[3] >= 'A' && input[3] <= 'C'))
-		&& (input[1] >= '1' && input[1] <= '3')
-		&& (input[4] >= '1' && input[4] <= '3')
-		)
-	{
-		// Converting the input coords to work with our matrix.
-		// Chess coords actually list the column first but column
-		// comes second in our matrix coords, so keep that in mind.
-		array<int, 2> fromCoord;
-		array<int, 2> toCoord;
-		if (input[0] == 'a' || input[0] == 'A')
+		if (input.size() == 5 && (input[2] == '-')
+			&& ((input[0] >= 'a' && input[0] <= 'c') || (input[0] >= 'A' && input[0] <= 'C'))
+			&& ((input[3] >= 'a' && input[3] <= 'c') || (input[3] >= 'A' && input[3] <= 'C'))
+			&& (input[1] >= '1' && input[1] <= '3')
+			&& (input[4] >= '1' && input[4] <= '3')
+			)
 		{
-			fromCoord[1] = 0;
-		}
-		else if (input[0] == 'b' || input[0] == 'B')
-		{
-			fromCoord[1] = 1;
-		}
-		else if (input[0] == 'c' || input[0] == 'C')
-		{
-			fromCoord[1] = 2;
-		}
-		fromCoord[0] = 3 - ((int)input[1] - 48); // ascii conversion, and converting from board coord to matrix coord
-
-		if (input[3] == 'a' || input[3] == 'A')
-		{
-			toCoord[1] = 0;
-		}
-		else if (input[3] == 'b' || input[0] == 'B')
-		{
-			toCoord[1] = 1;
-		}
-		else if (input[3] == 'c' || input[0] == 'C')
-		{
-			toCoord[1] = 2;
-		}
-		toCoord[0] = 3 - ((int)input[4] - 48); // ascii conversion, and converting from board coord to matrix coord
-
-		Move m = Move(fromCoord, toCoord, 1);
-
-		for (unsigned int i = 0; i < legalMoves.size(); i++)
-		{
-			if (m.equals(legalMoves[i])) {
-				return m;
+			// Converting the input coords to work with our matrix.
+			// Chess coords actually list the column first but column
+			// comes second in our matrix coords, so keep that in mind.
+			array<int, 2> fromCoord;
+			array<int, 2> toCoord;
+			if (input[0] == 'a' || input[0] == 'A')
+			{
+				fromCoord[1] = 0;
 			}
+			else if (input[0] == 'b' || input[0] == 'B')
+			{
+				fromCoord[1] = 1;
+			}
+			else if (input[0] == 'c' || input[0] == 'C')
+			{
+				fromCoord[1] = 2;
+			}
+			fromCoord[0] = 3 - ((int)input[1] - 48); // ascii conversion, and converting from board coord to matrix coord
 
+			if (input[3] == 'a' || input[3] == 'A')
+			{
+				toCoord[1] = 0;
+			}
+			else if (input[3] == 'b' || input[0] == 'B')
+			{
+				toCoord[1] = 1;
+			}
+			else if (input[3] == 'c' || input[0] == 'C')
+			{
+				toCoord[1] = 2;
+			}
+			toCoord[0] = 3 - ((int)input[4] - 48); // ascii conversion, and converting from board coord to matrix coord
+
+			Move m = Move(fromCoord, toCoord, 1);
+
+			for (unsigned int i = 0; i < legalMoves.size(); i++)
+			{
+				if (m.equals(legalMoves[i])) {
+					return m;
+				}
+
+			}
+			cout << "Move is not available\n";
+			//TODO: print out valid moves to help user
 		}
-		cout << "Move is not available\n";
-		//TODO: print out valid moves to help user
+		else
+		{
+			cout << "Move is not in valid format\nPlease format your move as [starting coordinate]-[coordinate to move to]\n";
+		}
 	}
-	else
-	{
-		cout << "Move is not in valid format\nPlease format your move as [starting coordinate]-[coordinate to move to]\n";
-	}
-}
 	return Move();
 }
 
@@ -335,6 +313,4 @@ void update(int(&board)[3][3], Move move)
 
 	board[fromCoord[0]][fromCoord[1]] = 0;
 	board[toCoord[0]][toCoord[1]] = move.getPiece();
-
-
 }

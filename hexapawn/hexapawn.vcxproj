@@ -152,9 +152,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="hexapawn.cpp" />
+    <ClCompile Include="Move.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="rules.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Move.h" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="hexapawn.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

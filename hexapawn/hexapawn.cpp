@@ -7,6 +7,7 @@
 #include <array>
 #include <time.h>
 #include <fstream>
+#include <random>
 
 #include "Move.h"
 
@@ -26,7 +27,7 @@ int draw(int board[3][3]);
 vector<Move> calculateLegalMoves(bool isPlayerTurn, int board[3][3]);
 int checkGameover(int board[3][3], vector<Move> legalMoves, bool isPlayerTurn);
 Move handleInput(vector<Move> legalMoves);
-Move makeCPUMove(vector<Move> legalMoves, int board[3][3], vector<idea> &losingMoves);
+Move makeCPUMove(vector<Move> legalMoves, int board[3][3], vector<idea> &losingMoves, Move lastCPUMove, int lastBoard[3][3]);
 void update(int(&board)[3][3], Move move);
 bool boardsEqual(int a[3][3], int b[3][3]);
 void copyBoard(int(&to)[3][3], int from[3][3]);
@@ -34,7 +35,9 @@ void copyBoard(int(&to)[3][3], int from[3][3]);
 
 int main()
 {
-	cout << "James' Hexapawn game.\nType \"h\" for help, \"s\" to start a game, \"t\" to train the AI or  \"q\" to quit\n";
+	srand(time(NULL));
+	cout << "James' Hexapawn game.\nType \"h\" for help, \"s\" to start a game"
+		 << ", \"t\" to train the AI or \"q\" to quit\n";
 	string input;
 	int playerWins = 0;
 	int computerWins = 0;
@@ -63,7 +66,7 @@ int main()
 			cout << "Record: " << playerWins << "W-" << computerWins << "L\n";
 		}
 
-		cout << "Type \"h\" for help, \"s\" to start a game, and \"q\" to quit\n";
+		cout << "Type \"h\" for help, \"s\" to start a game, \"t\" to train the AI or \"q\" to quit\n";
 		cin >> input;
 	}
 }
@@ -79,11 +82,10 @@ void printRules()
 
 void trainAI(vector<idea>& losingMoves)
 {
-	//srand(time(NULL));
-
+	cout << "Training...\n"; 
 	int aiWinstreak = 0;
 	int totalGames = 0;
-	int gamesToWin = 100;
+	int gamesToWin = 1000;
 
 	int lastBoardState[3][3];
 	Move lastCPUMove;
@@ -130,7 +132,7 @@ void trainAI(vector<idea>& losingMoves)
 			}
 			else
 			{
-				move = makeCPUMove(legalMoves, board, losingMoves);
+				move = makeCPUMove(legalMoves, board, losingMoves, lastCPUMove, lastBoardState);
 				lastCPUMove = move;
 				copyBoard(lastBoardState, board);
 			}
@@ -184,7 +186,8 @@ int playGame(vector<idea>& losingMoves)
 		}
 		else
 		{
-			move = makeCPUMove(legalMoves, board, losingMoves);
+			move = makeCPUMove(legalMoves, board, losingMoves, lastCPUMove, lastBoardState);
+			cout << "Computer move:\n";
 			lastCPUMove = move;
 			copyBoard(lastBoardState, board);
 
@@ -405,9 +408,11 @@ Move handleInput(vector<Move> legalMoves)
 	return Move();
 }
 
-Move makeCPUMove(vector<Move> legalMoves, int board[3][3], vector<idea>& losingMoves)
+/*
+This method's logic is really confusing and messy, could probably be cleaned up
+ */
+Move makeCPUMove(vector<Move> legalMoves, int board[3][3], vector<idea>& losingMoves, Move lastCPUMove, int lastBoard[3][3])
 {
-	cout << "Computer moved:\n";
 	//srand (time(NULL));
 
 	// Randomize the order we check moves.
@@ -425,15 +430,32 @@ Move makeCPUMove(vector<Move> legalMoves, int board[3][3], vector<idea>& losingM
 		{
 			isLosingMove = false;
 		}
-		// check if the move and board matches any element in losingMoves
+		// go through each element in losing moves
 		for (int j = 0; j < losingMoves.size(); j++)
 		{
-			// if so, proceed to the next move in legalMoves, assume it is bad, repeat process
-			if ( move.equals(losingMoves[j].move) && boardsEqual(board, losingMoves[j].board) )
+			// if our move matches an element from losingmoves, 
+			if (move.equals(losingMoves[j].move) && boardsEqual(board, losingMoves[j].board))
 			{
-				isLosingMove = true;
-				move = legalMoves[i++];
-				break;
+				// If we failed to find a legal move that isn't losing, then the LAST move the CPU did must be added to losing moves
+				if (i == legalMoves.size() - 1)
+				{
+					struct idea i;
+					i.move = lastCPUMove;
+					copyBoard(i.board, lastBoard);
+					losingMoves.push_back(i);
+
+					// play the losing move, we have no choice!
+					return move;
+
+				}
+				// if legal move is losing, but we can still check more legal moves, move on to the next one
+				else
+				{
+					isLosingMove = true;
+					i++;
+					move = legalMoves[i];
+					break;
+				}
 			}
 			else
 			{
@@ -441,11 +463,7 @@ Move makeCPUMove(vector<Move> legalMoves, int board[3][3], vector<idea>& losingM
 			}
 		}
 	}
-	// we will only break out of this loop once we have selected a legal move that is not a losing one.
-	// so just return that move
 	return move;
-
-	return legalMoves[i];
 }
 
 void update(int(&board)[3][3], Move move)

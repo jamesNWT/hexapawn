@@ -12,15 +12,23 @@
 
 using namespace std;
 
+struct idea
+{
+	Move move;
+	int board[3][3];
+};
+
 void printRules();
-int playGame();
+int playGame(vector<idea>& losingMoves);
 
 int draw(int board[3][3]);
 vector<Move> calculateLegalMoves(bool isPlayerTurn, int board[3][3]);
 int checkGameover(int board[3][3], vector<Move> legalMoves, bool isPlayerTurn);
 Move handleInput(vector<Move> legalMoves);
-Move makeCPUMove(vector<Move> legalMoves);
+Move makeCPUMove(vector<Move> legalMoves, int board[3][3], vector<idea> &losingMoves);
 void update(int(&board)[3][3], Move move);
+bool boardsEqual(int a[3][3], int b[3][3]);
+void copyBoard(int(&to)[3][3], int from[3][3]);
 
 
 int main()
@@ -30,6 +38,7 @@ int main()
 	int playerWins = 0;
 	int computerWins = 0;
 	int result = 0;
+	vector <idea> losingMoves;
 
 	cin >> input;
 	while (input.compare("q") != 0) {
@@ -40,7 +49,7 @@ int main()
 		}
 		else if (input.compare("s") == 0)
 		{
-			result = playGame();
+			result = playGame(losingMoves);
 
 			if (result == 1)
 				playerWins++;
@@ -63,13 +72,16 @@ void printRules()
 	cout << "\n";
 }
 
-int playGame()
+int playGame(vector<idea>& losingMoves)
 {
 	// The board will be represented with a 3x3 matrix.
 	// -1 corresponds to 'X' pieces, 0 to empty squares. and 1 to 'O' pieces.
 	// Trickily, row 0 in the matrix is actually row 3 on the board.
 	// row 1 in matrix is 2 on the board, and row 2 in the matrix is row 1 on the board.
 	int board[3][3] = { {-1, -1, -1}, {0, 0, 0}, {1, 1, 1} };
+	
+	int lastBoardState[3][3];
+	Move lastCPUMove;
 
 	// Game loop
 	int gameOver = 0;
@@ -83,6 +95,12 @@ int playGame()
 		gameOver = checkGameover(board, legalMoves, isPlayerTurn);
 
 		if (gameOver != 0) {
+			if (gameOver == 1) {
+				struct idea i;
+				i.move = lastCPUMove;
+				copyBoard(i.board, lastBoardState);
+				losingMoves.push_back(i);
+			}
 			return gameOver;
 		}
 
@@ -95,7 +113,10 @@ int playGame()
 		}
 		else
 		{
-			move = makeCPUMove(legalMoves);
+			move = makeCPUMove(legalMoves, board, losingMoves);
+			lastCPUMove = move;
+			copyBoard(lastBoardState, board);
+
 		}
 
 		isPlayerTurn = !isPlayerTurn;
@@ -313,12 +334,45 @@ Move handleInput(vector<Move> legalMoves)
 	return Move();
 }
 
-//TODO: implement some AI here.
-Move makeCPUMove(vector<Move> legalMoves)
+Move makeCPUMove(vector<Move> legalMoves, int board[3][3], vector<idea>& losingMoves)
 {
 	cout << "Computer moved:\n";
 	//srand (time(NULL));
-	int i = (rand() % legalMoves.size());
+
+	// Randomize the order we check moves.
+	random_shuffle(legalMoves.begin(), legalMoves.end());
+
+	// pick the first move and assume it is bad
+	bool isLosingMove = true;
+	int i = 0;
+	Move move = legalMoves[i];
+	
+	// while the move is bad
+	while (isLosingMove)
+	{
+		if (losingMoves.size() == 0)
+		{
+			isLosingMove = false;
+		}
+		// check if the move and board matches any element in losingMoves
+		for (int j = 0; j < losingMoves.size(); j++)
+		{
+			// if so, proceed to the next move in legalMoves, assume it is bad, repeat process
+			if ( move.equals(losingMoves[j].move) && boardsEqual(board, losingMoves[j].board) )
+			{
+				isLosingMove = true;
+				move = legalMoves[i++];
+				break;
+			}
+			else
+			{
+				isLosingMove = false;
+			}
+		}
+	}
+	// we will only break out of this loop once we have selected a legal move that is not a losing one.
+	// so just return that move
+	return move;
 
 	return legalMoves[i];
 }
@@ -330,4 +384,28 @@ void update(int(&board)[3][3], Move move)
 
 	board[fromCoord[0]][fromCoord[1]] = 0;
 	board[toCoord[0]][toCoord[1]] = move.getPiece();
+}
+
+bool boardsEqual(int a[3][3], int b[3][3])
+{
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			if (a[i][j] != b[i][j])
+				return false;
+		}
+	}
+	return true;
+}
+
+void copyBoard(int (&to)[3][3], int from[3][3])
+{
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			to[i][j] = from[i][j];
+		}
+	}
 }

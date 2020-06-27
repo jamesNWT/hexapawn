@@ -14,3 +14,8 @@ Help with this implementation of hexapawn:
    "O" pieces.
 4. I recommend you make sure your console has a width of at least 
    25 characters to make sure the board displays properly.
+5. The computer learns to play over multiple games by keeping track 
+   of what moves lost it the game. It starts out making random moves
+   but but will eventually never lose! After about 15 unique games it
+   gets pretty good, but not perfect. It resets each time you start 
+   this program.

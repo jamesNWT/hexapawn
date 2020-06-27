@@ -16,6 +16,9 @@ Help with this implementation of hexapawn:
    25 characters to make sure the board displays properly.
 5. The computer learns to play over multiple games by keeping track 
    of what moves lost it the game. It starts out making random moves
-   but but will eventually never lose! After about 15 unique games it
-   gets pretty good, but not perfect. It resets each time you start 
-   this program.
+   but but will eventually never lose!
+6. If you start a new game before training the AI, you can watch it 
+   improve over the course of a series of games. If you want to play
+   against an AI that I'm pretty sure is unbeatable, train the AI 
+   before playing it by entering "t" when the options prompt comes 
+   up.

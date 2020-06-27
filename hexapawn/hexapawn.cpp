@@ -20,6 +20,7 @@ struct idea
 
 void printRules();
 int playGame(vector<idea>& losingMoves);
+void trainAI(vector<idea>& losingMoves);
 
 int draw(int board[3][3]);
 vector<Move> calculateLegalMoves(bool isPlayerTurn, int board[3][3]);
@@ -33,7 +34,7 @@ void copyBoard(int(&to)[3][3], int from[3][3]);
 
 int main()
 {
-	cout << "James' Hexapawn game.\nType \"h\" for help, \"s\" to start a game, and \"q\" to quit\n";
+	cout << "James' Hexapawn game.\nType \"h\" for help, \"s\" to start a game, \"t\" to train the AI or  \"q\" to quit\n";
 	string input;
 	int playerWins = 0;
 	int computerWins = 0;
@@ -46,6 +47,10 @@ int main()
 		if (input.compare("h") == 0)
 		{
 			printRules();
+		}
+		else if (input.compare("t") == 0)
+		{
+			trainAI(losingMoves);
 		}
 		else if (input.compare("s") == 0)
 		{
@@ -70,6 +75,72 @@ void printRules()
 	if (file.is_open())
 		std::cout << file.rdbuf();
 	cout << "\n";
+}
+
+void trainAI(vector<idea>& losingMoves)
+{
+	//srand(time(NULL));
+
+	int aiWinstreak = 0;
+	int totalGames = 0;
+	int gamesToWin = 100;
+
+	int lastBoardState[3][3];
+	Move lastCPUMove;
+
+	// training loop
+	
+	while (aiWinstreak < gamesToWin)
+	{
+		// The board will be represented with a 3x3 matrix.
+		// -1 corresponds to 'X' pieces, 0 to empty squares. and 1 to 'O' pieces.
+		// Trickily, row 0 in the matrix is actually row 3 on the board.
+		// row 1 in matrix is 2 on the board, and row 2 in the matrix is row 1 on the board.
+		int board[3][3] = { {-1, -1, -1}, {0, 0, 0}, {1, 1, 1} };
+		// game loop
+		bool isPlayerTurn = true;
+		while (true)
+		{
+			vector <Move> legalMoves = calculateLegalMoves(isPlayerTurn, board);
+
+			int gameOver = checkGameover(board, legalMoves, isPlayerTurn);
+
+			if (gameOver != 0) {
+				if (gameOver == 1) {
+					struct idea i;
+					i.move = lastCPUMove;
+					copyBoard(i.board, lastBoardState);
+					losingMoves.push_back(i);
+					aiWinstreak = 0;
+				}
+				else
+				{
+					aiWinstreak++;
+				}
+				totalGames++;
+				break;
+			}
+
+			Move move;
+
+			if (isPlayerTurn)
+			{
+				int randNum = rand() % legalMoves.size();
+				move = legalMoves[randNum];
+			}
+			else
+			{
+				move = makeCPUMove(legalMoves, board, losingMoves);
+				lastCPUMove = move;
+				copyBoard(lastBoardState, board);
+			}
+
+			isPlayerTurn = !isPlayerTurn;
+			update(board, move);
+		}
+	}
+	cout << "AI learned by playing against random moves until it won " 
+		 << gamesToWin << " games in a row, which took " << totalGames << " games.\n";
 }
 
 int playGame(vector<idea>& losingMoves)
